@@ -26,49 +26,69 @@ int main(int argc, char ** argv) {
 	 */
 	ofstream logFile;
 	logFile.open("Setting.txt");
+	
+string filePath;
+int K,convThreshold,DimLowSpace;
+float sampleRate;
+bool randominitializing;
+
+for (int i=1; i<argc;++i){
+if (string(argv[i])=="--filePath") {filePath=argv[i+1];}
+else if (string(argv[i])=="--K") K=atoi(argv[i+1]);
+else if (string(argv[i])=="--sampleRate") sampleRate=stof(argv[i+1]);
+else if (string(argv[i])=="--convThreshold") convThreshold=atoi(argv[i+1]);
+else if (string(argv[i])=="--DimLowSpace") DimLowSpace=atoi(argv[i+1]);
+else if (string(argv[i])=="--randominitializing") randominitializing=argv[i+1];
+}
+
 	/**
 	 * The full path to the input file containig the dataset.
 	 */
-	string filePath = argv[1]; 
+//	string filePath = argv[1]; 
 	logFile<<"The full path to the input file: "<< filePath<<endl;
-	/**
-	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
-	 */
-	string cmd="wc -l "+filePath;
-	string outputCmd = exec(cmd.c_str());
-	const int N=stoi(outputCmd.substr(0, outputCmd.find(" ")))-1;
-	/**
-	 * Dimension of Dataset (#Columns)
-	 */
-	int Dim;
-	string cmd2="head -n 1 "+ filePath + " |tr '\\,' '\\n' |wc -l ";
-	Dim = stoi(exec(cmd2.c_str())); 
-	logFile<<"The Dimension of Dataset (Number of Columns in inputfile): "<< Dim <<endl;
 	/**
 	 * K in K-NN that means the desired number of Nearest Neighbours to be computed.
 	 */
-	const int K = atoi(argv[2]); 
+//	const int K = atoi(argv[2]); 
 	logFile<<"The desired number of NN to be computed: "<< K <<endl;
 	/**
 	 * The rate at which we do sampling. This parameter plays a key role in the performance.
 	 * This parameter is a trades-off between the performance and the accuracy of the results.
 	 * Values closer to 1 provides more accurate results but the execution takes longer.
 	 */
-	float sampleRate = stof(argv[3]);
+//	float sampleRate = stof(argv[3]);
 	logFile<<"The sampleRate(The rate at which we do sampling): "<< sampleRate <<endl;  
 	/**
 	 * Convergance Threshold. A fixed integer is used here instead of delta*N*K.
 	 */
-	const int convThreshold = atoi(argv[4]); 
+//	const int convThreshold = atoi(argv[4]); 
 	logFile<<"The convergance threshold: "<< convThreshold <<endl; 
 	/**
 	 * Dimension of Low-D Space. 
 	 */
-	const int DimLowSpace = atoi(argv[5]);
+//	const int DimLowSpace = atoi(argv[5]);
+logFile<<"The Dimension of Low-D Space: "<< DimLowSpace <<endl; 
 	/**
 	 * Defining the Method for Initialization of data in low-D space
 	 */	 
-	bool randominitializing = argv[6]; 
+//	bool randominitializing = argv[6]; 
+logFile<<"Random Initialization of Points in Low-D Space: "<< randominitializing <<endl; 	
+	/**
+	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
+	 */
+	string cmd="wc -l "+filePath;
+	string outputCmd = exec(cmd.c_str());
+	const int N=stoi(outputCmd.substr(0, outputCmd.find(" ")))-1;
+logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o header ): "<< N <<endl;
+	/**
+	 * Dimension of Dataset (#Columns)
+	 */
+	int Dim;
+	string cmd2="head -n 1 "+ filePath + " |tr '\\,' '\\n' |wc -l ";
+	Dim = stoi(exec(cmd2.c_str())); 
+	logFile<<"The Dimension of Dataset Features(Number of Columns in inputfile): "<< Dim <<endl;
+    
+    logFile<<"------------END of INPUT READING------------"<< endl;
 	srand(17);
 	//--------------------------------------------------------------------------  
 	/**
@@ -182,7 +202,7 @@ int main(int argc, char ** argv) {
 	}
 
 	//--------------------------------------------------------------------------   	
-	logFile<<"Setting Low-D Space Design  "<<endl;
+	logFile<<"------------Setting Low-D Space Design------------"<<endl;
 	/**
 	 * sizesLowSpace is an array with Min and Max values for Low-D space 
 	 */
@@ -204,7 +224,7 @@ int main(int argc, char ** argv) {
 	for (int i = 0; i < N; ++i) { locationLowSpace[i] = new double[DimLowSpace]; }    
 
 	//--------------------------------------------------------------------------   
-	logFile<<" Starting Initialization in the Low-D Space "<<endl;
+	logFile<<"------------Starting Initialization in the Low-D Space------------"<<endl;
 	/**
 	 * Compute SigmaValues for each data point iteratively
 	 * @param randominitializing the methodology for Initialization of data in low-D space
@@ -221,7 +241,7 @@ int main(int argc, char ** argv) {
 	Initialization (randominitializing, locationLowSpace, logFile, N, K, WFinal, degreeMatrix, adjacencyMatrix, DimLowSpace, sizesLowSpace);
 
 	//--------------------------------------------------------------------------   
-	logFile<<" Starting Solution for Stochastic Gradient Descent (SGD) "<<endl;
+	logFile<<"------------Starting Solution for Stochastic Gradient Descent (SGD)------------"<<endl;
 
 	const float aValue=1.93;
 	const float bValue=0.79;
@@ -330,6 +350,7 @@ int main(int argc, char ** argv) {
 	}
 
 	//-------------------------------------------------------------------------- 
+	logFile<<"------------Starting Outputing the Results------------"<<endl;
 	/**
 	 * Output the coordinates of the projected data in the low-D space
 	 */ 

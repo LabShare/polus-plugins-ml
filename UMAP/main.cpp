@@ -13,6 +13,7 @@
 #include <math.h>
 #include <fstream>
 #include <float.h>
+#include <boost/filesystem.hpp>
 #include "KNN_Serial_Code.h"
 #include "highDimComputes.h"
 #include "Initialization.h"
@@ -27,18 +28,57 @@ int main(int argc, char ** argv) {
 	ofstream logFile;
 	logFile.open("Setting.txt");
 	
-string filePath;
+string filePath, outputPath;
 int K,convThreshold,DimLowSpace;
 float sampleRate;
 bool randominitializing;
 
 for (int i=1; i<argc;++i){
-if (string(argv[i])=="--filePath") {filePath=argv[i+1];}
-else if (string(argv[i])=="--K") K=atoi(argv[i+1]);
-else if (string(argv[i])=="--sampleRate") sampleRate=stof(argv[i+1]);
-else if (string(argv[i])=="--convThreshold") convThreshold=atoi(argv[i+1]);
-else if (string(argv[i])=="--DimLowSpace") DimLowSpace=atoi(argv[i+1]);
-else if (string(argv[i])=="--randominitializing") randominitializing=argv[i+1];
+	if (string(argv[i])=="--inputPath") {
+		string inputPath=argv[i+1];
+
+		if(!boost::filesystem::exists(inputPath) || !boost::filesystem::is_directory(inputPath))
+        {
+			logFile << "Incorrect input path";
+            return 1;
+        }
+
+		const std::string ext = ".csv";
+        boost::filesystem::recursive_directory_iterator it(inputPath);
+        boost::filesystem::recursive_directory_iterator endit;
+
+		bool fileFound = false;
+		while(it != endit) {
+                if(boost::filesystem::is_regular_file(*it) && it->path().extension() == ext){
+                        fileFound = true;
+						filePath = it->path().string();
+                        break;
+                }
+                ++it;
+        }
+		if (!fileFound){
+			logFile << "CSV file is not found in the input path";
+			return 1;
+		}
+	}
+	else if (string(argv[i])=="--K") K=atoi(argv[i+1]);
+	else if (string(argv[i])=="--sampleRate") sampleRate=stof(argv[i+1]);
+	else if (string(argv[i])=="--convThreshold") convThreshold=atoi(argv[i+1]);
+	else if (string(argv[i])=="--DimLowSpace") DimLowSpace=atoi(argv[i+1]);
+	else if (string(argv[i])=="--randominitializing") randominitializing=argv[i+1];
+	else if (string(argv[i])=="--outputPath"){
+		boost::filesystem::path p(argv[i+1]);
+
+		if(!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
+        {
+			logFile << "Incorrect output path";
+            return 1;
+        }
+
+		boost::filesystem::path joinedPath = p / boost::filesystem::path("ProjectedData_EmbeddedSpace.csv");
+		outputPath = joinedPath.string();
+
+	}
 }
 
 	/**
@@ -46,6 +86,7 @@ else if (string(argv[i])=="--randominitializing") randominitializing=argv[i+1];
 	 */
 //	string filePath = argv[1]; 
 	logFile<<"The full path to the input file: "<< filePath<<endl;
+	logFile<<"The full path to the output file: "<< outputPath<<endl;
 	/**
 	 * K in K-NN that means the desired number of Nearest Neighbours to be computed.
 	 */
@@ -355,7 +396,7 @@ logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o head
 	 * Output the coordinates of the projected data in the low-D space
 	 */ 
 	ofstream embeddedSpacefile;
-	embeddedSpacefile.open("ProjectedData_EmbeddedSpace.csv");	
+	embeddedSpacefile.open(outputPath);
 
 	for (int i = 0; i < N; ++i) {
 		for (int j = 0; j < DimLowSpace; ++j) {

@@ -26,9 +26,10 @@ int main(int argc, char ** argv) {
 	 * The errors and informational messages are outputted to the log file 
 	 */
 	ofstream logFile;
-	logFile.open("Setting.txt");
+	string logFileName="Setting.txt";
+	logFile.open(logFileName);
 
-	string filePath, outputPath;
+	string filePath, outputPath, LogoutputPath;
 	int K,convThreshold,DimLowSpace;
 	float sampleRate;
 	bool randominitializing;
@@ -75,6 +76,7 @@ int main(int argc, char ** argv) {
 				return 1;
 			}
 
+LogoutputPath=argv[i+1];
 			boost::filesystem::path joinedPath = p / boost::filesystem::path("ProjectedData_EmbeddedSpace.csv");
 			outputPath = joinedPath.string();
 
@@ -417,6 +419,12 @@ int main(int argc, char ** argv) {
 	}
 
 	embeddedSpacefile.close();
+    logFile.close();
+	/**
+	 * copy Logfile to the file system which could be accessed outside the docker container
+	 */ 
+	string cmd3="cp "+logFileName+"  "+LogoutputPath;
+	string outputCmd3 = exec(cmd3.c_str());
 
 	return 0;
 }

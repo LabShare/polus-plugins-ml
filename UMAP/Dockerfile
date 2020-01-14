@@ -7,9 +7,6 @@ RUN apt-get -y update && \
 #Create a new directory
 RUN mkdir -p /home/UMAP
  
-# Copy the current folder which contains C++ source code to the Docker image
-COPY . /home/UMAP
- 
 # Specify the working directory
 WORKDIR /home/UMAP
  
@@ -23,6 +20,10 @@ RUN ./b2
 ENV LD_LIBRARY_PATH="/home/UMAP/boost_1_71_0/stage/lib:${LD_LIBRARY_PATH}" 
 
 WORKDIR /home/UMAP
+
+# Copy the current folder which contains C++ source code to the Docker image
+COPY . /home/UMAP
+
 RUN g++ -I/home/UMAP/boost_1_71_0 main.cpp KNN_Serial_Code.cpp highDimComputes.cpp Initialization.cpp -o Out.exe -O2 -larmadillo -L/home/UMAP/boost_1_71_0/stage/lib -lboost_iostreams
 
 ENTRYPOINT ["./Out.exe"]

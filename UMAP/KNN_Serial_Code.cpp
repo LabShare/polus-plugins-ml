@@ -34,6 +34,7 @@ std::string exec(const char* cmd) {
 
 
 void computeKNNs(string filePath, const int N, const int Dim, const int K, float sampleRate, const int convThreshold,int** B_Index,double** B_Dist,double** dataPoints, ofstream& logFile){
+	logFile<<"------------Starting K-NN Solution------------"<<endl;
 	/**
 	 * corresponding flag for K-NN indices stored in B_Index
 	 */
@@ -278,7 +279,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 			New_Final_List[i].clear();
 		}
 	}
-
+	logFile<<"------------Ending of K-NN Solution------------"<<endl;
 	return;
 }
 

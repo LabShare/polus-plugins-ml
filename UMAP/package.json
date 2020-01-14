@@ -1,0 +1,85 @@
+{
+    "name": "UMAP (Shared-Memory)",
+    "version": "0.1.0",
+    "title": "UMAP (Shared-Memory)",
+    "description": "PCA Shared-Memory Code",
+    "author": "Mahdi Maghrebi",
+    "institution": "National Center for Advancing Translational Sciences, National Institutes of Health",
+    "containerId": "labshare/polus-umap-plugin:0.1.0",
+    "inputs": [
+        {
+            "name": "inputPath",
+            "type": "csvCollection",
+            "description": "Input csv File",
+            "required": "True"
+        },
+        {
+            "name": "K",
+            "type": "number",
+            "description": "The desired number of Nearest Neighbours to be computed",
+            "required": "True"
+        },
+        {
+            "name": "sampleRate",
+            "type": "number",
+            "description": "The rate at which to do sampling. This parameter plays a key role in the performance. This parameter is a trade-off between the performance and the accuracy of the results. Values closer to 1 provides more accurate results but the execution takes longer.",
+            "required": "True"
+        },
+        {
+            "name": "convThreshold",
+            "type": "number",
+            "description": "Convergance Threshold. A fixed integer is used here instead of delta*N*K",
+            "required": "True"
+        },
+        {
+            "name": "DimLowSpace",
+            "type": "number",
+            "description": "Dimension of Low-D Space",
+            "required": "True"
+        },
+        {
+            "name": "randominitializing",
+            "type": "boolean",
+            "description": "Defining the Method for Initialization of data in low-D space",
+            "required": "True"
+        }
+    ],
+    "outputs": [
+        {
+            "name": "outputPath",
+            "type": "csvCollection",
+            "description": "Full path of the output csv file"
+        }
+    ],
+    "ui": [
+        {
+            "key": "inputs.inputPath",
+            "title": "Input CSV collection",
+            "description": "Name of the input CSV collection"
+        },
+        {
+            "key": "inputs.K",
+			"title": "K",
+			"description": "The desired number of Nearest Neighbours to be computed"
+        },
+        {
+            "key": "inputs.sampleRate",
+            "title": "Sampling Rate",
+            "description": "This parameter plays a key role in the performance. This parameter is a trade-off between the performance and the accuracy of the results. Values closer to 1 provides more accurate results but the execution takes longer."
+        },
+        {
+            "key": "inputs.convThreshold",
+            "title": "Convergance Threshold",
+            "description": "A fixed integer is used here instead of delta*N*K"
+        },
+        {
+            "key": "inputs.DimLowSpace",
+            "title": "Dimension of Low-D Space"
+        },
+        {
+            "key": "inputs.randominitializing",
+            "title": "Random Initialization",
+            "description": "Whether to Use Random Data Initialization?"
+        }
+    ]
+}

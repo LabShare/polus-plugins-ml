@@ -27,100 +27,100 @@ int main(int argc, char ** argv) {
 	 */
 	ofstream logFile;
 	logFile.open("Setting.txt");
-	
-string filePath, outputPath;
-int K,convThreshold,DimLowSpace;
-float sampleRate;
-bool randominitializing;
 
-for (int i=1; i<argc;++i){
-	if (string(argv[i])=="--inputPath") {
-		string inputPath=argv[i+1];
+	string filePath, outputPath;
+	int K,convThreshold,DimLowSpace;
+	float sampleRate;
+	bool randominitializing;
 
-		if(!boost::filesystem::exists(inputPath) || !boost::filesystem::is_directory(inputPath))
-        {
-			logFile << "Incorrect input path";
-            return 1;
-        }
+	for (int i=1; i<argc;++i){
+		if (string(argv[i])=="--inputPath") {
+			string inputPath=argv[i+1];
 
-		const std::string ext = ".csv";
-        boost::filesystem::recursive_directory_iterator it(inputPath);
-        boost::filesystem::recursive_directory_iterator endit;
+			if(!boost::filesystem::exists(inputPath) || !boost::filesystem::is_directory(inputPath))
+			{
+				logFile << "Incorrect input path";
+				return 1;
+			}
 
-		bool fileFound = false;
-		while(it != endit) {
-                if(boost::filesystem::is_regular_file(*it) && it->path().extension() == ext){
-                        fileFound = true;
-						filePath = it->path().string();
-                        break;
-                }
-                ++it;
-        }
-		if (!fileFound){
-			logFile << "CSV file is not found in the input path";
-			return 1;
+			const std::string ext = ".csv";
+			boost::filesystem::recursive_directory_iterator it(inputPath);
+			boost::filesystem::recursive_directory_iterator endit;
+
+			bool fileFound = false;
+			while(it != endit) {
+				if(boost::filesystem::is_regular_file(*it) && it->path().extension() == ext){
+					fileFound = true;
+					filePath = it->path().string();
+					break;
+				}
+				++it;
+			}
+			if (!fileFound){
+				logFile << "CSV file is not found in the input path";
+				return 1;
+			}
+		}
+		else if (string(argv[i])=="--K") K=atoi(argv[i+1]);
+		else if (string(argv[i])=="--sampleRate") sampleRate=stof(argv[i+1]);
+		else if (string(argv[i])=="--convThreshold") convThreshold=atoi(argv[i+1]);
+		else if (string(argv[i])=="--DimLowSpace") DimLowSpace=atoi(argv[i+1]);
+		else if (string(argv[i])=="--randominitializing") randominitializing=argv[i+1];
+		else if (string(argv[i])=="--outputPath"){
+			boost::filesystem::path p(argv[i+1]);
+
+			if(!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
+			{
+				logFile << "Incorrect output path";
+				return 1;
+			}
+
+			boost::filesystem::path joinedPath = p / boost::filesystem::path("ProjectedData_EmbeddedSpace.csv");
+			outputPath = joinedPath.string();
+
 		}
 	}
-	else if (string(argv[i])=="--K") K=atoi(argv[i+1]);
-	else if (string(argv[i])=="--sampleRate") sampleRate=stof(argv[i+1]);
-	else if (string(argv[i])=="--convThreshold") convThreshold=atoi(argv[i+1]);
-	else if (string(argv[i])=="--DimLowSpace") DimLowSpace=atoi(argv[i+1]);
-	else if (string(argv[i])=="--randominitializing") randominitializing=argv[i+1];
-	else if (string(argv[i])=="--outputPath"){
-		boost::filesystem::path p(argv[i+1]);
-
-		if(!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
-        {
-			logFile << "Incorrect output path";
-            return 1;
-        }
-
-		boost::filesystem::path joinedPath = p / boost::filesystem::path("ProjectedData_EmbeddedSpace.csv");
-		outputPath = joinedPath.string();
-
-	}
-}
 
 	/**
 	 * The full path to the input file containig the dataset.
 	 */
-//	string filePath = argv[1]; 
+	//	string filePath = argv[1]; 
 	logFile<<"The full path to the input file: "<< filePath<<endl;
 	logFile<<"The full path to the output file: "<< outputPath<<endl;
 	/**
 	 * K in K-NN that means the desired number of Nearest Neighbours to be computed.
 	 */
-//	const int K = atoi(argv[2]); 
+	//	const int K = atoi(argv[2]); 
 	logFile<<"The desired number of NN to be computed: "<< K <<endl;
 	/**
 	 * The rate at which we do sampling. This parameter plays a key role in the performance.
 	 * This parameter is a trades-off between the performance and the accuracy of the results.
 	 * Values closer to 1 provides more accurate results but the execution takes longer.
 	 */
-//	float sampleRate = stof(argv[3]);
+	//	float sampleRate = stof(argv[3]);
 	logFile<<"The sampleRate(The rate at which we do sampling): "<< sampleRate <<endl;  
 	/**
 	 * Convergance Threshold. A fixed integer is used here instead of delta*N*K.
 	 */
-//	const int convThreshold = atoi(argv[4]); 
+	//	const int convThreshold = atoi(argv[4]); 
 	logFile<<"The convergance threshold: "<< convThreshold <<endl; 
 	/**
 	 * Dimension of Low-D Space. 
 	 */
-//	const int DimLowSpace = atoi(argv[5]);
-logFile<<"The Dimension of Low-D Space: "<< DimLowSpace <<endl; 
+	//	const int DimLowSpace = atoi(argv[5]);
+	logFile<<"The Dimension of Low-D Space: "<< DimLowSpace <<endl; 
 	/**
 	 * Defining the Method for Initialization of data in low-D space
 	 */	 
-//	bool randominitializing = argv[6]; 
-logFile<<"Random Initialization of Points in Low-D Space: "<< randominitializing <<endl; 	
+	//	bool randominitializing = argv[6]; 
+	logFile<<"Random Initialization of Points in Low-D Space: "<< randominitializing <<endl; 	
 	/**
 	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
 	 */
 	string cmd="wc -l "+filePath;
 	string outputCmd = exec(cmd.c_str());
 	const int N=stoi(outputCmd.substr(0, outputCmd.find(" ")))-1;
-logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o header ): "<< N <<endl;
+	logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o header ): "<< N <<endl;
 	/**
 	 * Dimension of Dataset (#Columns)
 	 */
@@ -128,8 +128,8 @@ logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o head
 	string cmd2="head -n 1 "+ filePath + " |tr '\\,' '\\n' |wc -l ";
 	Dim = stoi(exec(cmd2.c_str())); 
 	logFile<<"The Dimension of Dataset Features(Number of Columns in inputfile): "<< Dim <<endl;
-    
-    logFile<<"------------END of INPUT READING------------"<< endl;
+
+	logFile<<"------------END of INPUT READING------------"<< endl;
 	srand(17);
 	//--------------------------------------------------------------------------  
 	/**
@@ -344,10 +344,15 @@ logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o head
 				for (int jj = 0; jj < DimLowSpace; ++jj) {  
 					dist_squared += pow(locationLowSpace[headIndex][jj]-locationLowSpace[tailIndex][jj],2);
 				}
-
-				double coeff= -2*aValue*bValue*pow(dist_squared,bValue-1)/(1+aValue*pow(dist_squared,bValue));        		
+				
+				double coeff;
+				if (dist_squared==0) continue;  //Be Checked Later!!
+				else {coeff= -2*aValue*bValue*pow(dist_squared,bValue-1)/(1+aValue*pow(dist_squared,bValue)); }
+			      		
 				for (int jj = 0; jj < DimLowSpace; ++jj) { 
 					locationLowSpace[headIndex][jj] += alpha* clip(coeff*(locationLowSpace[headIndex][jj]-locationLowSpace[tailIndex][jj]));
+
+					
 					if (locationLowSpace[headIndex][jj] < MinDimLowDSpace) locationLowSpace[headIndex][jj] = MinDimLowDSpace;
 					else if (locationLowSpace[headIndex][jj] > MaxDimLowDSpace) locationLowSpace[headIndex][jj] = MaxDimLowDSpace;
 					if (move_other==1) 	{
@@ -398,9 +403,15 @@ logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o head
 	ofstream embeddedSpacefile;
 	embeddedSpacefile.open(outputPath);
 
+	for (int j = 0; j < DimLowSpace; ++j) {
+		if (j != DimLowSpace-1) embeddedSpacefile<<"Dimension"<<j+1<<",";
+		else embeddedSpacefile<<"Dimension"<<j+1<<endl;
+	}
+
 	for (int i = 0; i < N; ++i) {
-		for (int j = 0; j < DimLowSpace; ++j) {
-			if (j==DimLowSpace-1) {embeddedSpacefile<< locationLowSpace[i][j]<<endl;}
+		for (int j = 0; j < DimLowSpace; ++j) {		
+			if (j==DimLowSpace-1) {
+				embeddedSpacefile<< locationLowSpace[i][j]<<endl;}
 			else {embeddedSpacefile<< locationLowSpace[i][j]<<",";}
 		}
 	}

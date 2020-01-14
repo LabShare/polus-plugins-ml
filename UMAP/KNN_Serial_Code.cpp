@@ -213,7 +213,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 		 * Create "New'"(or REVERSE("New")) for each Datapoint
 		 */
 		for (int i = 0; i < N; ++i) {
-			for (int j = 0; j < New_Index[i].size(); ++j) {
+			for (size_t j = 0; j < New_Index[i].size(); ++j) {
 				Reverse_New_Index[New_Index[i][j]].push_back(i);
 			}
 		}
@@ -221,7 +221,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 		 * Random Sampling from "New'"
 		 */
 		for (int i = 0; i < N; ++i) {
-			for (int j = 0; j < Reverse_New_Index[i].size(); ++j) {
+			for (size_t j = 0; j < Reverse_New_Index[i].size(); ++j) {
 				if (float(rand() % 100) / 100 < sampleRate) {
 					Sampled_Reverse_New_Index[i].push_back(Reverse_New_Index[i][j]);
 				}
@@ -231,10 +231,10 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 		 * "New"= "New" U SAMPLE("New'", pK)
 		 */
 		for (int i = 0; i < N; ++i) {
-			for (int j = 0; j < New_Index[i].size(); ++j) {
+			for (size_t j = 0; j < New_Index[i].size(); ++j) {
 				New_Final_List[i].push_back(New_Index[i][j]);
 			}
-			for (int j = 0; j < Sampled_Reverse_New_Index[i].size(); ++j) {
+			for (size_t j = 0; j < Sampled_Reverse_New_Index[i].size(); ++j) {
 				New_Final_List[i].push_back(Sampled_Reverse_New_Index[i][j]);
 			}
 		}

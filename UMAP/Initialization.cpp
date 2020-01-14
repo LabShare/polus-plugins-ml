@@ -57,7 +57,7 @@ void Initialization (bool randominitializing, double** locationLowSpace, ofstrea
 			typedef std::vector<float> stdvec;
 			std::vector< std::vector<float> > tmpvector;
 
-			for (size_t i = 1; i < DimLowSpace+1; ++i) {
+			for (int i = 1; i < DimLowSpace+1; ++i) {
 				stdvec vectest = arma::conv_to< stdvec >::from(eigvec.col(i));
 				//will throw "error: Mat::col(): index out of bounds" if no eigvec was available
 				tmpvector.push_back(vectest);  

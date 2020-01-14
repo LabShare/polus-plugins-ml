@@ -60,7 +60,6 @@ An Example of Running the code
 .. code:: bash
 
     ulimit -s unlimited
-    g++ -I/path to boost directory/boost_1_71_0  main.cpp KNN_Serial_Code.cpp highDimComputes.cpp Initialization.cpp -o a.out -O2 -larmadillo -L/path to boost directory/boost_1_71_0/stage/lib -lboost_iostreams
-    time ./a.out inputfile.csv 9 0.8 5 2 true
-
+    g++ -I/path to boost directory/boost_1_71_0  main.cpp KNN_Serial_Code.cpp highDimComputes.cpp Initialization.cpp -o a.out -O2 -larmadillo -L/path to boost directory/boost_1_71_0/stage/lib -lboost_iostreams -lboost_system -lboost_filesystem
+    time ./a.out --inputPath . --K 9 --sampleRate 0.8 --convThreshold 5 --DimLowSpace 2 --randominitializing true --outputPath .
 

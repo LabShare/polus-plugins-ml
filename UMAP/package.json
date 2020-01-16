@@ -1,11 +1,11 @@
 {
     "name": "UMAP (Shared-Memory)",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "title": "UMAP (Shared-Memory)",
     "description": "PCA Shared-Memory Code",
     "author": "Mahdi Maghrebi",
     "institution": "National Center for Advancing Translational Sciences, National Institutes of Health",
-    "containerId": "labshare/polus-umap-plugin:0.1.0",
+    "containerId": "labshare/polus-umap-plugin:0.1.1",
     "inputs": [
         {
             "name": "inputPath",

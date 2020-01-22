@@ -32,14 +32,30 @@ std::string exec(const char* cmd) {
 	return result;
 }
 
-
-void computeKNNs(string filePath, const int N, const int Dim, const int K, float sampleRate, const int convThreshold,int** B_Index,double** B_Dist,double** dataPoints, ofstream& logFile){
+/**
+ * Compute K-NN following the algorithm for shared-memory K-NN
+ * @param filePath The full path to the input file containig the dataset.
+ * @param N Size of Dataset without the header (i.e.(#Rows in dataset)-1).	 
+ * @param Dim Dimension of Dataset (#Columns) 
+ * @param K the desired number of Nearest Neighbours to be computed
+ * @param sampleRate The rate at which we do sampling
+ * @param convThreshold Convergance Threshold
+ * @param logFile The errors and informational messages are outputted to the log file 	 
+ * @return B_Index indices of K-NN for each data point 	 
+ * @return B_Dist corresponding distance for K-NN indices stored in B_Index	 
+ */
+void computeKNNs(string filePath, const int N, const int Dim, const int K, float sampleRate, const int convThreshold,int** B_Index,double** B_Dist, ofstream& logFile){
 	logFile<<"------------Starting K-NN Solution------------"<<endl;
+	/**
+	 * A 2D Array containing the entire input dataset (read from filePath).
+	 */
+	double** dataPoints = new double*[N];
+	for (int i = 0; i < N; ++i) { dataPoints[i] = new double[Dim]; }
 	/**
 	 * corresponding flag for K-NN indices stored in B_Index
 	 */
-	int** B_IsNew = new int*[N];
-	for (int i = 0; i < N; ++i) { B_IsNew[i] = new int[K]; }
+	short** B_IsNew = new short*[N];
+	for (int i = 0; i < N; ++i) { B_IsNew[i] = new short[K]; }
 	/**
 	 * Data structure for new[v]
 	 */
@@ -64,7 +80,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 	 * An approximation of zero in computing distances. Two points with the distance
 	 * smaller than epsilon are considered as one point.
 	 */
-	double epsilon = 1e-14; 
+	double epsilon = 1e-10; 
 	short* allEntriesFilled = new short[N];
 	/**
 	 * At first, let's Read Dataset from Input File
@@ -108,6 +124,13 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 			*/	//	}	
 	//	}
 	infile.close();
+
+	for (int j = 0; j < Dim; ++j) {
+		//cout<<dataPoints[100][j]<<endl;
+	}
+
+
+
 	//	if (argc == 7) Dim=colIndex2-colIndex1+1;
 	/**
 	 * define a seed for random generator. Using a constant value produces
@@ -268,7 +291,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 			}
 		}
 		logFile << "c_criteria = " << c_criteria << " With Threshold Convergence of " << convThreshold << endl;
-		if (c_criteria < convThreshold) { iterate = 0; }
+		if (c_criteria < convThreshold) { iterate = false; }
 		/**
 		 * Clear the contents of the used data structures
 		 */
@@ -278,7 +301,9 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 			Sampled_Reverse_New_Index[i].clear();
 			New_Final_List[i].clear();
 		}
-	}
+	}	
+
+	delete[] dataPoints;
 	logFile<<"------------Ending of K-NN Solution------------"<<endl;
 	return;
 }

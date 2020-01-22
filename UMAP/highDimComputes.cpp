@@ -8,6 +8,10 @@
 #include "highDimComputes.h"
 using namespace std;
 
+
+/**
+ * Compute B_Index and B_Dist for the closest points (K-NNs) 
+ */
 void findMin(int** B_Index,double** B_Dist, int N,int K,int* B_Index_Min,double* B_Dist_Min){
 
 	for (int i=0;i<N;++i){
@@ -26,8 +30,17 @@ void findMin(int** B_Index,double** B_Dist, int N,int K,int* B_Index_Min,double*
 	}
 }
 
-
-void findSigma(double target, double ** B_Dist, double * B_Dist_Min, double * SigmaValues, int N, int K){
+/**
+ * Smooth approximator to K-NN distance
+ */
+void findSigma(double ** B_Dist, double * B_Dist_Min, double * SigmaValues, int N, int K){
+	/**
+	 * Right-side of equation to compute SigmaValues
+	 */
+	double target=log2(K);
+	/**
+	 * Design Parameters to estimate SigmaValues
+	 */	
 	const int iterations=10000;
 	const double Error=1e-5;
 
@@ -62,10 +75,14 @@ void findSigma(double target, double ** B_Dist, double * B_Dist_Min, double * Si
 	}
 }
 
+/**
+ * Standard clamping of a value into a fixed range (in this case -4.0 to 4.0)
+ * This function is used in SGD solver
+ */    
 double clip(double value){
 
-	const double clipLowVal=-4;
-	const double clipHighVal=4;
+	const double clipLowVal=-4.0;
+	const double clipHighVal=4.0;
 	double returnValue;
 
 	if (value < clipLowVal) {returnValue=clipLowVal;}

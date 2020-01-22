@@ -72,7 +72,7 @@
             "title": "Dimension of Low-D Space"
         },
         {
-            "key": "inputs.randominitializing",
+            "key": "inputs.randomInitializing",
             "title": "Random Initialization",
             "description": "Whether to Use Random Data Initialization?"
         },

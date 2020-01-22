@@ -26,21 +26,21 @@
             "required": "True"
         },
         {
-            "name": "convThreshold",
-            "type": "number",
-            "description": "Convergance Threshold. A fixed integer is used here instead of delta*N*K",
-            "required": "True"
-        },
-        {
             "name": "DimLowSpace",
             "type": "number",
             "description": "Dimension of Low-D Space",
             "required": "True"
         },
         {
-            "name": "randominitializing",
+            "name": "randomInitializing",
             "type": "boolean",
             "description": "Defining the Method for Initialization of data in low-D space",
+            "required": "True"
+        },
+        {
+            "name": "nEpochs",
+            "type": "number",
+            "description": "The number of training epochs",
             "required": "True"
         }
     ],

@@ -1,5 +1,7 @@
 FROM ubuntu:latest
 
+COPY VERSION /
+
 RUN apt-get -y update && \
     apt-get -y install g++ wget make libarmadillo-dev
 

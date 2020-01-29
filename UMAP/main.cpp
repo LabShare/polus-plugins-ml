@@ -19,6 +19,7 @@
 #include "KNN_Serial_Code.h"
 #include "highDimComputes.h"
 #include "Initialization.h"
+#include "LMOptimization.h"
 #include <exception>
 #include <sstream>
 
@@ -41,20 +42,27 @@ int main(int argc, char ** argv) {
 	 * Values closer to 1 provides more accurate results but the execution takes longer.
 	 * DimLowSpace: Dimension of Low-D or embedding space (usually 1,2,or 3).
 	 * randomInitializing: Defining the Method for Initialization of data in low-D space
-	 *  nEpochs: is the number of training epochs to be used in optimizing. Larger values result in more accurate embeddings
+	 * nEpochs: is the number of training epochs to be used in optimizing. Larger values result in more accurate embeddings
+	 * min_dist defines how tight the points are from each other in Low-D space
+	 * distanceMetric is the metric to compute the distance between the points in high-D space, by deafult should be euclidean
+	 * distanceV1 is the first optional variable needed for computing distance in some metrics
+	 * distanceV2 is the second optional variable needed for computing distance in some metrics
+	 * inputPathOptionalArray is the full path to the directory that contains a csv file of the optional array needed for computing distance in some metrics. 
 	 */
-	string filePath, outputPath, LogoutputPath;
+	string filePath, filePathOptionalArray="", outputPath, LogoutputPath, inputPath;
 	int K,DimLowSpace,nEpochs;
-	float sampleRate;
+	float sampleRate,min_dist,distanceV1=0,distanceV2=0;
 	bool randomInitializing;
+	string distanceMetric="euclidean";
 
 	for (int i=1; i<argc;++i){
 		if (string(argv[i])=="--inputPath") {
-			string inputPath=argv[i+1];
+			inputPath=argv[i+1];
 
 			if(!boost::filesystem::exists(inputPath) || !boost::filesystem::is_directory(inputPath))
 			{
 				logFile << "Incorrect input path";
+				cout << "Incorrect input path";
 				return 1;
 			}
 
@@ -73,11 +81,13 @@ int main(int argc, char ** argv) {
 			}
 			if (!fileFound){
 				logFile << "CSV file is not found in the input path";
+				cout << "CSV file is not found in the input path";
 				return 1;
 			}
 		}
 		else if (string(argv[i])=="--K") K=atoi(argv[i+1]);
 		else if (string(argv[i])=="--sampleRate") sampleRate=stof(argv[i+1]);
+		else if (string(argv[i])=="--min_dist") min_dist=stof(argv[i+1]);
 		//else if (string(argv[i])=="--convThreshold") convThreshold=atoi(argv[i+1]);
 		else if (string(argv[i])=="--DimLowSpace") DimLowSpace=atoi(argv[i+1]);
 		else if (string(argv[i])=="--randomInitializing") {
@@ -90,6 +100,7 @@ int main(int argc, char ** argv) {
 			if(!boost::filesystem::exists(p) || !boost::filesystem::is_directory(p))
 			{
 				logFile << "Incorrect output path";
+				cout << "Incorrect output path";
 				return 1;
 			}
 
@@ -99,6 +110,39 @@ int main(int argc, char ** argv) {
 
 		}
 		else if (string(argv[i])=="--nEpochs") nEpochs=atoi(argv[i+1]);
+		else if (string(argv[i])=="--distanceMetric") distanceMetric=argv[i+1];
+		else if (string(argv[i])=="--distanceV1") distanceV1=stof(argv[i+1]);
+		else if (string(argv[i])=="--distanceV2") distanceV2=stof(argv[i+1]);
+		else if (string(argv[i])=="--inputPathOptionalArray") {
+			string inputPathOptionalArray=argv[i+1];
+
+			if(!boost::filesystem::exists(inputPathOptionalArray) || !boost::filesystem::is_directory(inputPathOptionalArray))
+			{
+				logFile << "Incorrect input path";
+				cout << "Incorrect input path";
+				return 1;
+			}
+
+			const std::string ext = ".csv";
+			boost::filesystem::recursive_directory_iterator it(inputPathOptionalArray);
+			boost::filesystem::recursive_directory_iterator endit;
+
+			bool fileFound = false;
+			while(it != endit) {
+				if(boost::filesystem::is_regular_file(*it) && it->path().extension() == ext){
+					fileFound = true;
+					filePathOptionalArray = it->path().string();
+					break;
+				}
+				++it;
+			}
+			if (!fileFound){
+				logFile << "CSV file is not found in the input path";
+				cout << "CSV file is not found in the input path";
+				return 1;
+			}
+		}
+
 	}
 	logFile<<"------------The following Input Arguments were read------------"<<endl;
 	logFile<<"The full path to the input file: "<< filePath<<endl;
@@ -107,8 +151,32 @@ int main(int argc, char ** argv) {
 	logFile<<"The sampleRate(The rate at which we do sampling): "<< sampleRate <<endl;  
 	//logFile<<"The convergance threshold: "<< convThreshold <<endl; 
 	logFile<<"The Dimension of Low-D Space: "<< DimLowSpace <<endl; 
+	logFile << std::boolalpha;
 	logFile<<"Random Initialization of Points in Low-D Space: "<< randomInitializing <<endl; 
-	logFile<<"The number of training epochs: "<< nEpochs <<endl; 	
+	logFile<<"The number of training epochs: "<< nEpochs <<endl; 
+	logFile<<"The chosen min_dist parameter: "<< min_dist <<endl; 	
+	logFile<<"The metric to compute the distance between the points in high-D space: "<< distanceMetric <<endl; 
+	logFile<<"The optional variable 1 for the distance: "<< distanceV1 <<endl; 
+	logFile<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
+	logFile<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;	
+	
+	
+	cout<<"------------The following Input Arguments were read------------"<<endl;
+	cout<<"The full path to the input file: "<< filePath<<endl;
+	cout<<"The full path to the output file: "<< outputPath<<endl;
+	cout<<"The desired number of NN to be computed: "<< K <<endl;
+	cout<<"The sampleRate(The rate at which we do sampling): "<< sampleRate <<endl;  
+	//cout<<"The convergance threshold: "<< convThreshold <<endl; 
+	cout<<"The Dimension of Low-D Space: "<< DimLowSpace <<endl; 
+	cout << std::boolalpha;
+	cout<<"Random Initialization of Points in Low-D Space: "<< randomInitializing <<endl; 
+	cout<<"The number of training epochs: "<< nEpochs <<endl; 
+	cout<<"The chosen min_dist parameter: "<< min_dist <<endl; 	
+	cout<<"The metric to compute the distance between the points in high-D space: "<< distanceMetric <<endl; 
+	cout<<"The optional variable 1 for the distance: "<< distanceV1 <<endl; 
+	cout<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
+	cout<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;
+	 
 	/**
 	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
 	 */
@@ -116,6 +184,7 @@ int main(int argc, char ** argv) {
 	string outputCmd = exec(cmd.c_str());
 	const int N=stoi(outputCmd.substr(0, outputCmd.find(" ")))-1;
 	logFile<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o header ): "<< N <<endl;
+	cout<<"The Dimension of Dataset Records (Number of Rows in inputfile w/o header ): "<< N <<endl;
 	/**
 	 * Dimension of Dataset (#Columns)
 	 */
@@ -123,9 +192,15 @@ int main(int argc, char ** argv) {
 	string cmd2="head -n 1 "+ filePath + " |tr '\\,' '\\n' |wc -l ";
 	Dim = stoi(exec(cmd2.c_str())); 
 	logFile<<"The Dimension of Dataset Features(Number of Columns in inputfile): "<< Dim <<endl;
+	cout<<"The Dimension of Dataset Features(Number of Columns in inputfile): "<< Dim <<endl;
 
-	logFile<<"------------END of INPUT READING------------"<< endl;
-	srand(17);			 
+	logFile<<"------------END of INPUT READING------------"<< endl;	
+	cout<<"------------END of INPUT READING------------"<< endl;
+	srand(17);	
+	/**
+	 *  zero approximation in float precision
+	 */
+	float epsilon=1e-6;		 
 	/**
 	 * convThreshold: Convergance Threshold of K-NN. A fixed integer is used here instead of delta*N*K. 
 	 */		 
@@ -149,11 +224,15 @@ int main(int argc, char ** argv) {
 	 * @param K the desired number of Nearest Neighbours to be computed
 	 * @param sampleRate The rate at which we do sampling
 	 * @param convThreshold Convergance Threshold
-	 * @param logFile The errors and informational messages are outputted to the log file 	 
+	 * @param logFile The errors and informational messages are outputted to the log file
+	 * @param distanceMetric is the metric to compute the distance between the points in high-D space, by deafult should be euclidean
+	 * @param distanceV1 is the first optional variable needed for computing distance in some metrics
+	 * @param distanceV2 is the second optional variable needed for computing distance in some metrics	
+	 * @param filePathOptionalArray The full path to optional array for the distance metric computation
 	 * @return B_Index indices of K-NN for each data point 	 
 	 * @return B_Dist corresponding distance for K-NN indices stored in B_Index	 
 	 */
-	computeKNNs(filePath, N, Dim, K, sampleRate, convThreshold,B_Index,B_Dist, logFile);
+	computeKNNs(filePath, N, Dim, K, sampleRate, convThreshold,B_Index,B_Dist, logFile, distanceMetric, distanceV1, distanceV2,filePathOptionalArray);
 
 	int* B_Index_Min = new int[N];
 	double* B_Dist_Min = new double[N];
@@ -236,6 +315,7 @@ int main(int argc, char ** argv) {
 	delete[] adjacencyMatrixAT, adjacencyMatrixA;  
 
 	logFile<<"------------Setting Low-D Space Design------------"<<endl;
+	cout<<"------------Setting Low-D Space Design------------"<<endl;
 	/**
 	 * sizesLowSpace is an array with Min (MinDimLowDSpace) and Max (MaxDimLowDSpace) values for Low-D space 
 	 */
@@ -259,6 +339,7 @@ int main(int argc, char ** argv) {
 	for (int i = 0; i < N; ++i) { locationLowSpace[i] = new double[DimLowSpace]; }    
 
 	logFile<<"------------Starting Initialization in the Low-D Space------------"<<endl;
+	cout<<"------------Starting Initialization in the Low-D Space------------"<<endl;
 	/**
 	 * Initializes the data points in low-D space
 	 * @param randomInitializing the methodology for Initialization of data in low-D space
@@ -271,12 +352,23 @@ int main(int argc, char ** argv) {
 	 */
 	Initialization (randomInitializing, locationLowSpace, logFile, N, adjacencyMatrixB, DimLowSpace, sizesLowSpace);
 
-	logFile<<"------------Starting Solution for Stochastic Gradient Descent (SGD)------------"<<endl;
+	logFile<<"------------Starting Estimating Hyper-Parameters a and b ------------"<<endl;
+	cout<<"------------Starting Estimating Hyper-Parameters a and b ------------"<<endl;
 	/**
-	 * Hyper-Parameters a and b. Assuming that min_dist = 0.001 
+	 * Hyper-Parameters a and b which needs to be estimated by data fitting. 
 	 */
-	const float aValue=1.93;
-	const float bValue=0.79;
+	float aValue, bValue;
+	float spread=1.0;
+	/**
+	 *  Estimation of Hyper-Parameters a and b by curve fitting and using Levenberg-Marquardt solution
+	 */		
+	estimateParameters(aValue, bValue, min_dist, spread, logFile);
+
+	logFile<<"The Estimated Values for a is "<< aValue << " and for b is "<< bValue <<endl;
+	cout<<"The Estimated Values for a is "<< aValue << " and for b is "<< bValue <<endl;
+
+	logFile<<"------------Starting Solution for Stochastic Gradient Descent (SGD)------------"<<endl;	
+	cout<<"------------Starting Solution for Stochastic Gradient Descent (SGD)------------"<<endl;
 	/**
 	 *  alpha is the Initial learning rate for the SGD. alpha starts from 1 and decreases in each epoch iteration
 	 */	
@@ -291,9 +383,6 @@ int main(int argc, char ** argv) {
 	 */
 	vector<float> head, tail;
 	vector<float> epochs_per_sample;
-
-	// zero approximation
-	float epsilon=1e-6;
 
 	// adjacencyMatrixB is a symmetric matrix, thus, we only search half of it
 	for (int i = 0; i < N; ++i) {	
@@ -338,13 +427,13 @@ int main(int argc, char ** argv) {
 
 	// The main training loop     
 	for (int n = 0; n < nEpochs; ++n) {
-	    //Loop over all edges of the graph  	    	  
+		//Loop over all edges of the graph  	    	  
 		for (int i = 0; i < edgeCounts; ++i) {  	
 			if (epoch_of_next_sample[i] <= n){ 	
 
 				int headIndex = head[i];   
 				int tailIndex = tail[i];  
-				
+
 				double dist_squared=0;
 				for (int jj = 0; jj < DimLowSpace; ++jj) {  
 					dist_squared += pow(locationLowSpace[headIndex][jj]-locationLowSpace[tailIndex][jj],2);
@@ -399,6 +488,7 @@ int main(int argc, char ** argv) {
 	}
 
 	logFile<<"------------Starting Outputing the Results------------"<<endl;
+	cout<<"------------Starting Outputing the Results------------"<<endl;
 	/**
 	 * Output the coordinates of the projected data in the low-D space
 	 */ 
@@ -423,7 +513,9 @@ int main(int argc, char ** argv) {
 	/**
 	 * copy Logfile to the file system which could be accessed outside the docker container
 	 */ 
-	string cmd3="cp "+logFileName+"  "+LogoutputPath+ " 2>&1 /dev/null";
+	string cmd3="cp "+ logFileName+"  "+LogoutputPath;
+	// To remove the returning messages, we can switch to the following command 
+	//	string cmd3="cp "+ logFileName+"  "+LogoutputPath+ " 2>&1 /dev/null";
 	string outputCmd3 = exec(cmd3.c_str());
 
 	return 0;

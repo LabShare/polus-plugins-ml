@@ -15,6 +15,7 @@ void Initialization (bool randominitializing, double** locationLowSpace, ofstrea
 	if (!randominitializing){
 		try{
 			logFile<<" Spectral Initialization of Data in Lower Space"<<endl;
+			cout<<" Spectral Initialization of Data in Lower Space"<<endl;
 
 			/**
 			 * DegreeMatrix is a diagonal matrix contains information about the degree of each vertex 
@@ -106,6 +107,7 @@ void Initialization (bool randominitializing, double** locationLowSpace, ofstrea
 			}
 		} catch(std::exception& e){
 			logFile<<" Spectral Initialization Failed. Will proceed with random initialization."<<endl; 
+			cout<<" Spectral Initialization Failed. Will proceed with random initialization."<<endl; 
 			randominitializing=true ; }
 	}
 	/**
@@ -114,6 +116,7 @@ void Initialization (bool randominitializing, double** locationLowSpace, ofstrea
 	 */
 	if (randominitializing){
 		logFile<<" Random Initialization of Data in low-D Space"<<endl;
+		cout<<" Random Initialization of Data in low-D Space"<<endl;
 		for (int i = 0; i < N; ++i) {
 			for (int j = 0; j < DimLowSpace; ++j) {
 				double tmp=(double)rand()/RAND_MAX;

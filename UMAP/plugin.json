@@ -42,6 +42,36 @@
             "type": "number",
             "description": "The number of training epochs",
             "required": "True"
+        },
+        {
+            "name": "min_dist",
+            "type": "number",
+            "description": "The variable that controls how tight (to each other) the data are placed in Low-D space",
+            "required": "True"
+        },
+        {
+            "name": "distanceMetric",
+            "type": "enum",
+            "description": "The name of metric used to compute the distance",
+            "required": "True"
+        },
+        {
+            "name": "distanceV1",
+            "type": "number",
+            "description": "The optional input needed for computation of some metrics",
+            "required": "False"
+        },
+        {
+            "name": "distanceV2",
+            "type": "number",
+            "description": "The optional input needed for computation of some metrics",
+            "required": "False"
+        },
+        {
+            "name": "inputPathOptionalArray",
+            "type": "csvCollection",
+            "description": "The optional csv file representing a vector needed in computation of some metrics",
+            "required": "False"
         }
     ],
     "outputs": [

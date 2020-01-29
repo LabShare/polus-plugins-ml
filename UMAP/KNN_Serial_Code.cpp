@@ -10,9 +10,8 @@
 #include <float.h>
 #include <boost/iostreams/stream.hpp> 
 #include "KNN_Serial_Code.h"
+#include "Metrics.h"  
 using namespace std;
-
-
 
 /**
  * Read the output of linux command execution 
@@ -40,12 +39,19 @@ std::string exec(const char* cmd) {
  * @param K the desired number of Nearest Neighbours to be computed
  * @param sampleRate The rate at which we do sampling
  * @param convThreshold Convergance Threshold
- * @param logFile The errors and informational messages are outputted to the log file 	 
+ * @param logFile The errors and informational messages are outputted to the log file 
+ * @param distanceMetric is the metric to compute the distance between the points in high-D space, by deafult should be euclidean
+ * @param distanceV1 is the first optional variable needed for computing distance in some metrics
+ * @param distanceV2 is the second optional variable needed for computing distance in some metrics	
+ * @param filePathOptionalArray The full path to optional array for the distance metric computation 	 
  * @return B_Index indices of K-NN for each data point 	 
  * @return B_Dist corresponding distance for K-NN indices stored in B_Index	 
  */
-void computeKNNs(string filePath, const int N, const int Dim, const int K, float sampleRate, const int convThreshold,int** B_Index,double** B_Dist, ofstream& logFile){
+//void computeKNNs(string filePath, const int N, const int Dim, const int K, float sampleRate, const int convThreshold,int** B_Index,double** B_Dist, ofstream& logFile){
+void computeKNNs(string filePath, const int N, const int Dim, const int K, float sampleRate, const int convThreshold,int** B_Index,double** B_Dist, ofstream& logFile, string distanceMetric, float distanceV1, float distanceV2, string filePathOptionalArray){ 
+
 	logFile<<"------------Starting K-NN Solution------------"<<endl;
+	cout<<"------------Starting K-NN Solution------------"<<endl;
 	/**
 	 * A 2D Array containing the entire input dataset (read from filePath).
 	 */
@@ -90,6 +96,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 	if (infile.fail())
 	{
 		logFile << "error in Opening Input File" << endl;
+		cout << "error in Opening Input File" << endl;
 		return ;
 	}
 	/**
@@ -272,17 +279,23 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 				for (it2 = it_temp; it2 != New_Final_List[i].end(); it2++) {
 					if (*it != *it2) {
 						/**
-						 * computes spatial distance between two points
-						 * @param  a and b represents the indice of two points in dataset,
-						 * data represents input dataPoints read from filePath, Dim is #columns in dataset
-						 * @return spatial distance between points a and b
-						 */
-						double dist = 0;
-						for (int i = 0; i < Dim; ++i) {
-							dist += pow((dataPoints[*it][i] - dataPoints[*it2][i]), 2);
+						 * computes spatial distance between two points based on the chosen Metric
+						 * @param distanceMetric the metric to compute the distance between the points in high-D space
+						 * @param dataPoints represents input dataPoints read from filePath
+						 * @param *it and *it2 indices of the desired points in input dataset
+						 * @param Dim is #columns (or features) in input dataset
+						 * @param distanceV1 is the first optional variable needed for computing distance in some metrics
+						 * @param distanceV2 is the second optional variable needed for computing distance in some metrics	
+						 * @param filePathOptionalArray The full path to optional array for the distance metric computation 
+						 * @param logFile The errors and informational messages are outputted to the log file 
+						 * @return spatial distance between points two points 
+						 */					
+						double dista = computeDistance (distanceMetric, dataPoints, *it, *it2, Dim, distanceV1, distanceV2, filePathOptionalArray, logFile);
+
+						if (dista < epsilon) {
+						logFile << "Found Duplicate Data for Points "<< *it << " and " << *it2; 
+						cout << "Found Duplicate Data for Points "<< *it << " and " << *it2;
 						}
-						double dista = sqrt(dist);
-						if (dista < epsilon) {logFile << "Found Duplicate Data for Points "<< *it << " and " << *it2; }
 
 						c_criteria += UpdateNN(*it, *it2, dista, 1);
 						c_criteria += UpdateNN(*it2, *it, dista, 1);
@@ -291,6 +304,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 			}
 		}
 		logFile << "c_criteria = " << c_criteria << " With Threshold Convergence of " << convThreshold << endl;
+		cout << "c_criteria = " << c_criteria << " With Threshold Convergence of " << convThreshold << endl;
 		if (c_criteria < convThreshold) { iterate = false; }
 		/**
 		 * Clear the contents of the used data structures
@@ -305,6 +319,7 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 
 	delete[] dataPoints;
 	logFile<<"------------Ending of K-NN Solution------------"<<endl;
+	cout<<"------------Ending of K-NN Solution------------"<<endl;
 	return;
 }
 

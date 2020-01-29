@@ -8,7 +8,8 @@ Please consider the following instruction for the execution of UMAP code for Sha
 Installing the Required Library
 -------------------------------
 
-UMAP requires two external libraries of Boost and Armadillo for the execution. The steps for installing Boost library are explained below.
+UMAP requires three external libraries of Boost, Armadillo, and Eigen3 for the execution. 
+The steps for installing Boost library are explained below.
  
 .. code:: bash
     
@@ -21,11 +22,18 @@ UMAP requires two external libraries of Boost and Armadillo for the execution. T
 
 It is recommended to include the above last line into ~/.bashrc file. 
 
-The Armadillo library can also be installed using the following command.
+The Armadillo library can be installed using the following command.
 
 .. code:: bash
     sudo apt-get -y install libarmadillo-dev
 
+The Eigen3 library is an header-only library and can be downloaded using the following command.
+
+.. code:: bash
+    wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz
+    tar xfz eigen-3.3.7.tar.gz 
+    rm eigen-3.3.7.tar.gz
+ 
 -----------------
 Runtime Arguments
 -----------------
@@ -45,6 +53,11 @@ The code required the following parameters as the input.
                            and if set to false, the positions are defined by solving Laplacian matrix using Armadillo library.  
 6- ``outputPath``: The full path to the directory in which the output files will be saved. 
 7- ``nEpochs``: The total number of training epochs over the pairs of data points during SGD solution. 
+8- ``min_dist``: defines how tight the points are from each other in Low-D space. The default value should be 0.001.
+9- ``distanceMetric``: is the metric to compute the distance between the points in high-D space. The default value should be euclidean.
+10- ``distanceV1``: is the first optional variable needed for computing distance in some metrics.
+11- ``distanceV2``: is the second optional variable needed for computing distance in some metric.
+12- ``inputPathOptionalArray``: The full path to the directory that contains a csv file of the optional array needed for computing distance in some metrics. 
 
 -----------
 The Outputs
@@ -62,6 +75,7 @@ An Example of Running the code
 .. code:: bash
 
     ulimit -s unlimited
-    g++ -I/path to boost directory/boost_1_71_0  main.cpp KNN_Serial_Code.cpp highDimComputes.cpp Initialization.cpp -o a.out -O2 -larmadillo -L/path to boost directory/boost_1_71_0/stage/lib -lboost_iostreams -lboost_system -lboost_filesystem
-    time ./a.out --inputPath . --K 15 --sampleRate 0.8 --DimLowSpace 2 --randomInitializing true --outputPath . --nEpochs 500
+    g++ -I/path to boost directory/boost_1_71_0  -I/Path to eigen3 directory/eigen-3.3.7  main.cpp KNN_Serial_Code.cpp highDimComputes.cpp Initialization.cpp LMOptimization.cpp Metrics.cpp -o a.out -O2 - armadillo -L/path to boost directory/boost_1_71_0/stage/lib -lboost_iostreams -lboost_system -lboost_filesystem
+    time ./a.out --inputPath . --K 15 --sampleRate 0.8 --DimLowSpace 2 --randomInitializing true --outputPath . --nEpochs 500 --min_dist 0.001 --distanceMetric euclidean
+    
 

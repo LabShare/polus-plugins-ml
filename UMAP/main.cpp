@@ -17,9 +17,10 @@
 #include <float.h>
 #include <boost/filesystem.hpp>
 #include "KNN_Serial_Code.h"
-#include "highDimComputes.h"
+#include "highDComputes.h"
 #include "Initialization.h"
 #include "LMOptimization.h"
+#include "SGD.h"
 #include <exception>
 #include <sstream>
 
@@ -42,7 +43,7 @@ int main(int argc, char ** argv) {
 	 * Values closer to 1 provides more accurate results but the execution takes longer.
 	 * DimLowSpace: Dimension of Low-D or embedding space (usually 1,2,or 3).
 	 * randomInitializing: Defining the Method for Initialization of data in low-D space
-	 * nEpochs: is the number of training epochs to be used in optimizing. Larger values result in more accurate embeddings
+	 * n_epochs: is the number of training epochs to be used in optimizing. Larger values result in more accurate embeddings
 	 * min_dist defines how tight the points are from each other in Low-D space
 	 * distanceMetric is the metric to compute the distance between the points in high-D space, by deafult should be euclidean
 	 * distanceV1 is the first optional variable needed for computing distance in some metrics
@@ -50,7 +51,7 @@ int main(int argc, char ** argv) {
 	 * inputPathOptionalArray is the full path to the directory that contains a csv file of the optional array needed for computing distance in some metrics. 
 	 */
 	string filePath, filePathOptionalArray="", outputPath, LogoutputPath, inputPath;
-	int K,DimLowSpace,nEpochs;
+	int K,DimLowSpace,n_epochs;
 	float sampleRate,min_dist,distanceV1=0,distanceV2=0;
 	bool randomInitializing;
 	string distanceMetric="euclidean";
@@ -88,7 +89,6 @@ int main(int argc, char ** argv) {
 		else if (string(argv[i])=="--K") K=atoi(argv[i+1]);
 		else if (string(argv[i])=="--sampleRate") sampleRate=stof(argv[i+1]);
 		else if (string(argv[i])=="--min_dist") min_dist=stof(argv[i+1]);
-		//else if (string(argv[i])=="--convThreshold") convThreshold=atoi(argv[i+1]);
 		else if (string(argv[i])=="--DimLowSpace") DimLowSpace=atoi(argv[i+1]);
 		else if (string(argv[i])=="--randomInitializing") {
 			std::stringstream ss(argv[i+1]);
@@ -109,7 +109,7 @@ int main(int argc, char ** argv) {
 			outputPath = joinedPath.string();
 
 		}
-		else if (string(argv[i])=="--nEpochs") nEpochs=atoi(argv[i+1]);
+		else if (string(argv[i])=="--n_epochs") n_epochs=atoi(argv[i+1]);
 		else if (string(argv[i])=="--distanceMetric") distanceMetric=argv[i+1];
 		else if (string(argv[i])=="--distanceV1") distanceV1=stof(argv[i+1]);
 		else if (string(argv[i])=="--distanceV2") distanceV2=stof(argv[i+1]);
@@ -149,34 +149,32 @@ int main(int argc, char ** argv) {
 	logFile<<"The full path to the output file: "<< outputPath<<endl;
 	logFile<<"The desired number of NN to be computed: "<< K <<endl;
 	logFile<<"The sampleRate(The rate at which we do sampling): "<< sampleRate <<endl;  
-	//logFile<<"The convergance threshold: "<< convThreshold <<endl; 
 	logFile<<"The Dimension of Low-D Space: "<< DimLowSpace <<endl; 
 	logFile << std::boolalpha;
 	logFile<<"Random Initialization of Points in Low-D Space: "<< randomInitializing <<endl; 
-	logFile<<"The number of training epochs: "<< nEpochs <<endl; 
+	logFile<<"The number of training epochs: "<< n_epochs <<endl; 
 	logFile<<"The chosen min_dist parameter: "<< min_dist <<endl; 	
 	logFile<<"The metric to compute the distance between the points in high-D space: "<< distanceMetric <<endl; 
 	logFile<<"The optional variable 1 for the distance: "<< distanceV1 <<endl; 
 	logFile<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
 	logFile<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;	
-	
-	
+
+
 	cout<<"------------The following Input Arguments were read------------"<<endl;
 	cout<<"The full path to the input file: "<< filePath<<endl;
 	cout<<"The full path to the output file: "<< outputPath<<endl;
 	cout<<"The desired number of NN to be computed: "<< K <<endl;
-	cout<<"The sampleRate(The rate at which we do sampling): "<< sampleRate <<endl;  
-	//cout<<"The convergance threshold: "<< convThreshold <<endl; 
+	cout<<"The sampleRate(The rate at which we do sampling): "<< sampleRate <<endl;   
 	cout<<"The Dimension of Low-D Space: "<< DimLowSpace <<endl; 
 	cout << std::boolalpha;
 	cout<<"Random Initialization of Points in Low-D Space: "<< randomInitializing <<endl; 
-	cout<<"The number of training epochs: "<< nEpochs <<endl; 
+	cout<<"The number of training epochs: "<< n_epochs <<endl; 
 	cout<<"The chosen min_dist parameter: "<< min_dist <<endl; 	
 	cout<<"The metric to compute the distance between the points in high-D space: "<< distanceMetric <<endl; 
 	cout<<"The optional variable 1 for the distance: "<< distanceV1 <<endl; 
 	cout<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
 	cout<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;
-	 
+
 	/**
 	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
 	 */
@@ -233,6 +231,19 @@ int main(int argc, char ** argv) {
 	 * @return B_Dist corresponding distance for K-NN indices stored in B_Index	 
 	 */
 	computeKNNs(filePath, N, Dim, K, sampleRate, convThreshold,B_Index,B_Dist, logFile, distanceMetric, distanceV1, distanceV2,filePathOptionalArray);
+
+	bool flag=false;
+	for (int i = 0; i < N; ++i) {
+		for (int j = 0; j < K; ++j) {
+			if (B_Dist[i][j] < 0) {         
+				logFile<<"ALERT: A distance in high-D space was computed as negative, use this program with caution"<<endl;
+				cout<<"ALERT: A distance in high-D space was computed as negative, use this program with caution"<<endl; 
+				flag=true;
+				break; 
+			}     
+		}
+		if (flag) break;
+	}
 
 	int* B_Index_Min = new int[N];
 	double* B_Dist_Min = new double[N];
@@ -298,17 +309,26 @@ int main(int argc, char ** argv) {
 	}
 
 	/**
-	 * adjacencyMatrixB is undirected weights (similarities) function for all the edges in the high-D space 
+	 * graph is undirected weights (similarities) function for all the edges in the high-D space 
 	 */
-	float** adjacencyMatrixB = new float*[N];
-	for (int i = 0; i < N; ++i) { adjacencyMatrixB[i] = new float[N]; }	
+	float** graph = new float*[N];
+	for (int i = 0; i < N; ++i) { graph[i] = new float[N]; }	
 
 	float MaxWeight=0;
 	for (int i = 0; i < N; ++i){			
 		for (int j = 0; j < N; ++j){
 			float tmp = adjacencyMatrixA[i][j]+adjacencyMatrixAT[i][j]-adjacencyMatrixA[i][j]*adjacencyMatrixAT[i][j];  
-			adjacencyMatrixB[i][j]=tmp;
+			graph[i][j]=tmp;
 			if (tmp > MaxWeight) MaxWeight=tmp;       
+		}
+	}	
+
+	/**
+	 * Removing the small weights in accordance to https://github.com/lmcinnes/umap/blob/master/umap/umap_.py#L1032
+	 */
+	for (int i = 0; i < N; ++i){			
+		for (int j = 0; j < N; ++j){
+			if (graph[i][j] <  MaxWeight/n_epochs) graph[i][j]=0;  
 		}
 	}	
 
@@ -316,27 +336,12 @@ int main(int argc, char ** argv) {
 
 	logFile<<"------------Setting Low-D Space Design------------"<<endl;
 	cout<<"------------Setting Low-D Space Design------------"<<endl;
-	/**
-	 * sizesLowSpace is an array with Min (MinDimLowDSpace) and Max (MaxDimLowDSpace) values for Low-D space 
-	 */
-	double** sizesLowSpace = new double*[DimLowSpace];
-	for (int i = 0; i < DimLowSpace; ++i) { sizesLowSpace[i] = new double[2]; }
-	/**
-	 * By deafult, low-D space dimensions are between -10 and 10 
-	 */
-	int MinDimLowDSpace=-10;
-	int MaxDimLowDSpace=10;    
-
-	for (int i = 0; i < DimLowSpace; ++i){    
-		sizesLowSpace[i][0]=MinDimLowDSpace;
-		sizesLowSpace[i][1]=MaxDimLowDSpace;	
-	}
 
 	/**
-	 * locationLowSpace is the coordinates of the points in the low-D space  
+	 * embedding is the coordinates of the points in the low-D space  
 	 */
-	double** locationLowSpace = new double*[N];
-	for (int i = 0; i < N; ++i) { locationLowSpace[i] = new double[DimLowSpace]; }    
+	double** embedding = new double*[N];
+	for (int i = 0; i < N; ++i) { embedding[i] = new double[DimLowSpace]; }    
 
 	logFile<<"------------Starting Initialization in the Low-D Space------------"<<endl;
 	cout<<"------------Starting Initialization in the Low-D Space------------"<<endl;
@@ -345,12 +350,11 @@ int main(int argc, char ** argv) {
 	 * @param randomInitializing the methodology for Initialization of data in low-D space
 	 * @param logFile contains the errors and informational messages 
 	 * @param N Size of Dataset without the header (i.e.(#Rows in dataset)-1). 
-	 * @param adjacencyMatrixB contains undirected weights (similarities) in the form of a matrix of size NxN
-	 * @param DimLowSpace Dimension of Low-D space 	 
-	 * @param sizesLowSpace an array with Min and Max values for Low-D space 	 
-	 * @return locationLowSpace is the coordinates of the points in the low-D space	 	 	 
+	 * @param graph contains undirected weights (similarities) in the form of a matrix of size NxN
+	 * @param DimLowSpace Dimension of Low-D space 	 	 
+	 * @return embedding is the coordinates of the points in the low-D space	 	 	 
 	 */
-	Initialization (randomInitializing, locationLowSpace, logFile, N, adjacencyMatrixB, DimLowSpace, sizesLowSpace);
+	Initialization (randomInitializing, embedding, logFile, N, graph, DimLowSpace);
 
 	logFile<<"------------Starting Estimating Hyper-Parameters a and b ------------"<<endl;
 	cout<<"------------Starting Estimating Hyper-Parameters a and b ------------"<<endl;
@@ -370,11 +374,11 @@ int main(int argc, char ** argv) {
 	logFile<<"------------Starting Solution for Stochastic Gradient Descent (SGD)------------"<<endl;	
 	cout<<"------------Starting Solution for Stochastic Gradient Descent (SGD)------------"<<endl;
 	/**
-	 *  alpha is the Initial learning rate for the SGD. alpha starts from 1 and decreases in each epoch iteration
+	 *  alpha is the initial learning rate for the SGD. alpha starts from 1 and decreases in each epoch iteration
 	 */	
 	float alpha=1.0;  
 	/**
-	 * epochs_per_sample is a vector of edges with the values proportional to the values in adjacencyMatrixB 
+	 * epochs_per_sample is a vector of edges with the values proportional to the values in graph 
 	 * epochs_per_sample represents the epoch weight for edges where the edge with the highest similarity will get the value of 1 
 	 * and all other edges will get a proportional epoch weight scaled from it. epochs_per_sample is used as a measure to include an edge in 
 	 * SGD computations. The edge with the highest similarity will be used at every epoch iteration. 
@@ -384,13 +388,13 @@ int main(int argc, char ** argv) {
 	vector<float> head, tail;
 	vector<float> epochs_per_sample;
 
-	// adjacencyMatrixB is a symmetric matrix, thus, we only search half of it
+	// graph is a symmetric matrix, thus, we only search half of it
 	for (int i = 0; i < N; ++i) {	
 		for (int j = i+1; j < N; ++j) {	
 			// We are only looking for non-zero elements
-			if (adjacencyMatrixB[i][j] < epsilon) continue;
+			if (graph[i][j] < epsilon) continue;
 
-			epochs_per_sample.push_back(MaxWeight/adjacencyMatrixB[i][j]);
+			epochs_per_sample.push_back(MaxWeight/graph[i][j]);
 			head.push_back(i);
 			tail.push_back(j);			 
 		}
@@ -419,14 +423,14 @@ int main(int argc, char ** argv) {
 	/**
 	 *  move_other is equal to 1 if not embedding new previously unseen points to low-D space
 	 */
-	int move_other=1; 
+	const int move_other=1; 
 	/**
 	 *  dEpsilon is zero approximation in double precision
 	 */	
-	double dEpsilon=1e-14;
-
+	const double dEpsilon=1e-14;
+	double dist_squared;
 	// The main training loop     
-	for (int n = 0; n < nEpochs; ++n) {
+	for (int n = 0; n < n_epochs; ++n) {
 		//Loop over all edges of the graph  	    	  
 		for (int i = 0; i < edgeCounts; ++i) {  	
 			if (epoch_of_next_sample[i] <= n){ 	
@@ -434,24 +438,17 @@ int main(int argc, char ** argv) {
 				int headIndex = head[i];   
 				int tailIndex = tail[i];  
 
-				double dist_squared=0;
-				for (int jj = 0; jj < DimLowSpace; ++jj) {  
-					dist_squared += pow(locationLowSpace[headIndex][jj]-locationLowSpace[tailIndex][jj],2);
-				}
+				dist_squared = rdist(embedding, DimLowSpace, headIndex, tailIndex);
 
 				double grad_coeff;
 				if (dist_squared<dEpsilon) grad_coeff=0;  
 				else {grad_coeff= -2.0*aValue*bValue*pow(dist_squared,bValue-1)/(1.0+aValue*pow(dist_squared,bValue)); }
 
 				for (int jj = 0; jj < DimLowSpace; ++jj) { 
-					locationLowSpace[headIndex][jj] += alpha* clip(grad_coeff*(locationLowSpace[headIndex][jj]-locationLowSpace[tailIndex][jj]));
+					embedding[headIndex][jj] += alpha*clip(grad_coeff*(embedding[headIndex][jj]-embedding[tailIndex][jj]));
 
-					if (locationLowSpace[headIndex][jj] < MinDimLowDSpace) locationLowSpace[headIndex][jj] = MinDimLowDSpace;
-					else if (locationLowSpace[headIndex][jj] > MaxDimLowDSpace) locationLowSpace[headIndex][jj] = MaxDimLowDSpace;
 					if (move_other==1) 	{
-						locationLowSpace[tailIndex][jj] += -alpha* clip(grad_coeff*(locationLowSpace[headIndex][jj]-locationLowSpace[tailIndex][jj]));
-						if (locationLowSpace[tailIndex][jj] < MinDimLowDSpace) locationLowSpace[tailIndex][jj] = MinDimLowDSpace;
-						else if (locationLowSpace[tailIndex][jj] > MaxDimLowDSpace) locationLowSpace[tailIndex][jj] = MaxDimLowDSpace;								
+						embedding[tailIndex][jj] += -alpha*clip(grad_coeff*(embedding[headIndex][jj]-embedding[tailIndex][jj]));							
 					}
 				}
 
@@ -462,29 +459,23 @@ int main(int argc, char ** argv) {
 					int randomIndex = rand() % N;
 					if (randomIndex==headIndex) continue;
 
-					double dist_squared2=0;
-					for (int jj = 0; jj < DimLowSpace; ++jj) {  
-						dist_squared2 += pow(locationLowSpace[headIndex][jj]-locationLowSpace[randomIndex][jj],2);
-					} 
+					dist_squared= rdist(embedding, DimLowSpace, headIndex, randomIndex);
 
-					double grad_coeff2;
-					if (dist_squared2 < dEpsilon) grad_coeff2=0; 
-					else{ grad_coeff2 = 2.0*bValue/((0.001+dist_squared2)*(1.0+aValue*pow(dist_squared2,bValue))); }
+					if (dist_squared < dEpsilon) grad_coeff=0; 
+					else{ grad_coeff = 2.0*bValue/((0.001+dist_squared)*(1.0+aValue*pow(dist_squared,bValue))); }
 
 					for (int jj = 0; jj < DimLowSpace; ++jj) {  
-						if  (grad_coeff2 > 0) {
-							locationLowSpace[headIndex][jj] += alpha*clip(grad_coeff2*(locationLowSpace[headIndex][jj]-locationLowSpace[randomIndex][jj]));
+						if  (grad_coeff > 0) {
+							embedding[headIndex][jj] += alpha*clip(grad_coeff*(embedding[headIndex][jj]-embedding[randomIndex][jj]));
 						} else  {						
-							locationLowSpace[headIndex][jj] += alpha*4.0; 
+							embedding[headIndex][jj] += alpha*4.0; 
 						}
-						if (locationLowSpace[headIndex][jj] < MinDimLowDSpace) locationLowSpace[headIndex][jj] = MinDimLowDSpace;
-						else if (locationLowSpace[headIndex][jj] > MaxDimLowDSpace) locationLowSpace[headIndex][jj] = MaxDimLowDSpace;
 					}    	        
 				}       	    
 				epoch_of_next_negative_sample[i] += (n_neg_samples * epochs_per_negative_sample[i]);  
 			}   	
 		}    	
-		alpha=1.0-((float)n)/nEpochs;    	
+		alpha=1.0-((float)n)/n_epochs;    	
 	}
 
 	logFile<<"------------Starting Outputing the Results------------"<<endl;
@@ -503,8 +494,8 @@ int main(int argc, char ** argv) {
 	for (int i = 0; i < N; ++i) {
 		for (int j = 0; j < DimLowSpace; ++j) {		
 			if (j==DimLowSpace-1) {
-				embeddedSpacefile<< locationLowSpace[i][j]<<endl;}
-			else {embeddedSpacefile<< locationLowSpace[i][j]<<",";}
+				embeddedSpacefile<< embedding[i][j]<<endl;}
+			else {embeddedSpacefile<< embedding[i][j]<<",";}
 		}
 	}
 

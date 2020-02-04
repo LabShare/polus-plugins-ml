@@ -38,7 +38,7 @@
             "required": "True"
         },
         {
-            "name": "nEpochs",
+            "name": "n_epochs",
             "type": "number",
             "description": "The number of training epochs",
             "required": "True"

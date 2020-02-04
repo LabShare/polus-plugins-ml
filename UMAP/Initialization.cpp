@@ -7,10 +7,14 @@
 using namespace std;
 using namespace arma;
 
-
-void Initialization (bool randominitializing, double** locationLowSpace, ofstream& logFile, int N, float** adjacencyMatrix, int DimLowSpace, double** sizesLowSpace){
+void Initialization (bool randominitializing, double** embedding, ofstream& logFile, int N, float** adjacencyMatrix, int DimLowSpace){
 
 	srand(17);
+	/**
+	 * By deafult, low-D space dimensions are between -10 and 10 
+	 */
+	int minDimLowDSpace=-10;
+	int maxDimLowDSpace=10;    
 
 	if (!randominitializing){
 		try{
@@ -92,19 +96,27 @@ void Initialization (bool randominitializing, double** locationLowSpace, ofstrea
 				stdvec vectest = arma::conv_to< stdvec >::from(eigvec.col(i));			
 				tmpvector.push_back(vectest);  
 			}
-
-			//cout<<tmpvector.size()<<"  "<<tmpvector[0].size()<<endl; 
 			/**
 			 * using tmpvector to intialize the locations of the points in low-D space
-			 * locationLowSpace should not be outside the chosen dimensions for low-D space
+			 * embedding should not be outside the chosen dimensions for low-D space
 			 */
+			double maxembedding=0;
 			for (int j = 0; j < DimLowSpace; ++j) {    
 				for (int i = 0; i < N; ++i) {
-					locationLowSpace[i][j]=tmpvector[j][i];  
-					if (locationLowSpace[i][j] < sizesLowSpace[j][0]) locationLowSpace[i][j] = sizesLowSpace[j][0];
-					else if (locationLowSpace[i][j] > sizesLowSpace[j][1]) locationLowSpace[i][j] = sizesLowSpace[j][1];					
+					double tmp=tmpvector[j][i];
+					embedding[i][j]= tmp;
+
+					if (abs(tmp) > maxembedding) maxembedding=tmp;					
 				}
 			}
+
+			double expansion=double(maxDimLowDSpace)/maxembedding;
+			for (int i = 0; i < N; ++i) {			
+				for (int j = 0; j < DimLowSpace; ++j) { 			
+					embedding[i][j] *=expansion;
+				}
+			}
+
 		} catch(std::exception& e){
 			logFile<<" Spectral Initialization Failed. Will proceed with random initialization."<<endl; 
 			cout<<" Spectral Initialization Failed. Will proceed with random initialization."<<endl; 
@@ -120,9 +132,7 @@ void Initialization (bool randominitializing, double** locationLowSpace, ofstrea
 		for (int i = 0; i < N; ++i) {
 			for (int j = 0; j < DimLowSpace; ++j) {
 				double tmp=(double)rand()/RAND_MAX;
-				locationLowSpace[i][j]=sizesLowSpace[j][0]+(sizesLowSpace[j][1]-sizesLowSpace[j][0])*tmp;
-				if (locationLowSpace[i][j] < sizesLowSpace[j][0]) locationLowSpace[i][j] = sizesLowSpace[j][0];
-				else if (locationLowSpace[i][j] > sizesLowSpace[j][1]) locationLowSpace[i][j] = sizesLowSpace[j][1];				
+				embedding[i][j]=minDimLowDSpace+(maxDimLowDSpace-minDimLowDSpace)*tmp;				
 			}
 		}
 	}

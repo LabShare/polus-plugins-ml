@@ -293,8 +293,8 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 						double dista = computeDistance (distanceMetric, dataPoints, *it, *it2, Dim, distanceV1, distanceV2, filePathOptionalArray, logFile);
 
 						if (dista < epsilon) {
-						logFile << "Found Duplicate Data for Points "<< *it << " and " << *it2; 
-						cout << "Found Duplicate Data for Points "<< *it << " and " << *it2;
+							logFile << "Found Duplicate Data for Points "<< *it << " and " << *it2; 
+							cout << "Found Duplicate Data for Points "<< *it << " and " << *it2;
 						}
 
 						c_criteria += UpdateNN(*it, *it2, dista, 1);

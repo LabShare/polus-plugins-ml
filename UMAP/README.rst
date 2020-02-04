@@ -52,7 +52,7 @@ The code required the following parameters as the input.
 5- ``randomInitializing``: If set to true, the positions of data in the lower dimension space are initialized randomly; 
                            and if set to false, the positions are defined by solving Laplacian matrix using Armadillo library.  
 6- ``outputPath``: The full path to the directory in which the output files will be saved. 
-7- ``nEpochs``: The total number of training epochs over the pairs of data points during SGD solution. 
+7- ``n_epochs``: The total number of training epochs over the pairs of data points during SGD solution. 
 8- ``min_dist``: defines how tight the points are from each other in Low-D space. The default value should be 0.001.
 9- ``distanceMetric``: is the metric to compute the distance between the points in high-D space. The default value should be euclidean.
 10- ``distanceV1``: is the first optional variable needed for computing distance in some metrics.
@@ -75,7 +75,7 @@ An Example of Running the code
 .. code:: bash
 
     ulimit -s unlimited
-    g++ -I/path to boost directory/boost_1_71_0  -I/Path to eigen3 directory/eigen-3.3.7  main.cpp KNN_Serial_Code.cpp highDimComputes.cpp Initialization.cpp LMOptimization.cpp Metrics.cpp -o a.out -O2 - armadillo -L/path to boost directory/boost_1_71_0/stage/lib -lboost_iostreams -lboost_system -lboost_filesystem
-    time ./a.out --inputPath . --K 15 --sampleRate 0.8 --DimLowSpace 2 --randomInitializing true --outputPath . --nEpochs 500 --min_dist 0.001 --distanceMetric euclidean
+    g++ -I/path to boost directory/boost_1_71_0  -I/Path to eigen3 directory/eigen-3.3.7  main.cpp KNN_Serial_Code.cpp highDComputes.cpp Initialization.cpp LMOptimization.cpp Metrics.cpp SGD.cpp -o a.out -O2 - armadillo -L/path to boost directory/boost_1_71_0/stage/lib -lboost_iostreams -lboost_system -lboost_filesystem
+    time ./a.out --inputPath . --K 15 --sampleRate 0.8 --DimLowSpace 2 --randomInitializing true --outputPath . --n_epochs 500 --min_dist 0.001 --distanceMetric euclidean
     
 

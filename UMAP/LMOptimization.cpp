@@ -117,9 +117,9 @@ void estimateParameters(float &a, float &b, float min_dist, float spread, ofstre
 		if (tmp <= min_dist) y_values.push_back(1.0);
 		else if (tmp > min_dist) y_values.push_back(exp((min_dist-tmp)/spread));
 		else {
-		logFile<< "Error: Negative x_values during Parameter Estimation"<<endl;
-		cout<< "Error: Negative x_values during Parameter Estimation"<<endl;
-        }
+			logFile<< "Error: Negative x_values during Parameter Estimation"<<endl;
+			cout<< "Error: Negative x_values during Parameter Estimation"<<endl;
+		}
 	}
 
 	// 'm' is the number of data points.

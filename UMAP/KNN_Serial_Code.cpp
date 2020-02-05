@@ -132,12 +132,6 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 	//	}
 	infile.close();
 
-	for (int j = 0; j < Dim; ++j) {
-		//cout<<dataPoints[100][j]<<endl;
-	}
-
-
-
 	//	if (argc == 7) Dim=colIndex2-colIndex1+1;
 	/**
 	 * define a seed for random generator. Using a constant value produces
@@ -190,6 +184,9 @@ void computeKNNs(string filePath, const int N, const int Dim, const int K, float
 		if(allEntriesFilled[u1]==0){		
 			for (int j = 0; j < K; j++) {	
 				if (B_Dist[u1][j] < 0) {
+				
+				    for (int jj = 0; jj < j; jj++) {if (B_Index[u1][jj] == u2) return 0;}
+				
 					B_Dist[u1][j] = distance;
 					B_Index[u1][j] = u2;
 					B_IsNew[u1][j] = flag;

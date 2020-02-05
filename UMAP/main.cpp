@@ -328,6 +328,7 @@ int main(int argc, char ** argv) {
 	 */
 	for (int i = 0; i < N; ++i){			
 		for (int j = 0; j < N; ++j){
+			if (graph[i][j] <  epsilon) continue; 
 			if (graph[i][j] <  MaxWeight/n_epochs) graph[i][j]=0;  
 		}
 	}	
@@ -388,9 +389,8 @@ int main(int argc, char ** argv) {
 	vector<float> head, tail;
 	vector<float> epochs_per_sample;
 
-	// graph is a symmetric matrix, thus, we only search half of it
 	for (int i = 0; i < N; ++i) {	
-		for (int j = i+1; j < N; ++j) {	
+	    for (int j = 0; j < N; ++j) {
 			// We are only looking for non-zero elements
 			if (graph[i][j] < epsilon) continue;
 

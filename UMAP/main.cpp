@@ -300,16 +300,8 @@ int main(int argc, char ** argv) {
 	float** adjacencyMatrixAT = new float*[N];
 	for (int i = 0; i < N; ++i) { adjacencyMatrixAT[i] = new float[N]; }
 
-	/**
-	 * Initializing adjacencyMatrixAT
-	 */		
-	for (int i = 0; i < N; ++i){
-		adjacencyMatrixAT[i][i]=adjacencyMatrixA[i][i];
-	}
-
-	for (int i = 0; i < N-1; ++i){			
-		for (int j = i+1; j < N; ++j){
-			adjacencyMatrixAT[j][i]= adjacencyMatrixA[i][j];
+	for (int i = 0; i < N; ++i){			
+		for (int j = 0; j < N; ++j){
 			adjacencyMatrixAT[i][j]= adjacencyMatrixA[j][i];         
 		}
 	}

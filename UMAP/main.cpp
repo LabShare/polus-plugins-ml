@@ -175,6 +175,12 @@ int main(int argc, char ** argv) {
 	cout<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
 	cout<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;
 
+    if (K > N) {
+    logFile<<" The desired number of NN has exceeded the size of dataset "<<endl;
+    cout<<" The desired number of NN has exceeded the size of dataset "<<endl;   
+    return 1;
+    }
+
 	/**
 	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
 	 */

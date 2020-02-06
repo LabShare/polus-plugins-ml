@@ -41,7 +41,7 @@ void findSigma(double ** B_Dist, double * B_Dist_Min, double * SigmaValues, int 
 	/**
 	 * Design Parameters to estimate SigmaValues
 	 */	
-	const int iterations=10000;
+	const int iterations=640;
 	const double Error=1e-5;
 
 	for (int i=0; i<N; ++i){

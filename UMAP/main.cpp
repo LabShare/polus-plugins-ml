@@ -175,11 +175,11 @@ int main(int argc, char ** argv) {
 	cout<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
 	cout<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;
 
-    if (K > N) {
-    logFile<<" The desired number of NN has exceeded the size of dataset "<<endl;
-    cout<<" The desired number of NN has exceeded the size of dataset "<<endl;   
-    return 1;
-    }
+	if (K > N) {
+		logFile<<" The desired number of NN has exceeded the size of dataset "<<endl;
+		cout<<" The desired number of NN has exceeded the size of dataset "<<endl;   
+		return 1;
+	}
 
 	/**
 	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
@@ -388,7 +388,7 @@ int main(int argc, char ** argv) {
 	vector<float> epochs_per_sample;
 
 	for (int i = 0; i < N; ++i) {	
-	    for (int j = 0; j < N; ++j) {
+		for (int j = 0; j < N; ++j) {
 			// We are only looking for non-zero elements
 			if (graph[i][j] < epsilon) continue;
 
@@ -398,6 +398,8 @@ int main(int argc, char ** argv) {
 		}
 	}
 
+
+	delete[] graph;
 	/**
 	 * This section was adopted from SGD implementation at https://github.com/lmcinnes/umap/blob/8f2ef23ec835cc5071fe6351a0da8313d8e75706/umap/layouts.py#L136
 	 * edgeCounts is total number of edges in the high-D space graph

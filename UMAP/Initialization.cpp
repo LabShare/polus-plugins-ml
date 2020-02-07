@@ -1,9 +1,11 @@
 /**
- * Initializing the data points in the low-D space
+ * Initializing the location of data points in the low-D space
  */
 
 #include <iostream>
 #include <armadillo>
+#include <chrono>
+
 using namespace std;
 using namespace arma;
 
@@ -111,9 +113,15 @@ void Initialization (bool randominitializing, double** embedding, ofstream& logF
 			}
 
 			double expansion=double(maxDimLowDSpace)/maxembedding;
+
+			// Also adding a noise as prescribed in https://github.com/lmcinnes/umap/blob/master/umap/umap_.py#L1040
+			unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+			std::default_random_engine generator (seed);
+			std::normal_distribution<double> distribution (0.0,1.0);					
+
 			for (int i = 0; i < N; ++i) {			
 				for (int j = 0; j < DimLowSpace; ++j) { 			
-					embedding[i][j] *=expansion;
+					embedding[i][j] =embedding[i][j]* expansion+ 0.0001*distribution(generator);
 				}
 			}
 

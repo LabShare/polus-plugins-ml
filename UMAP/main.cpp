@@ -23,6 +23,7 @@
 #include "SGD.h"
 #include <exception>
 #include <sstream>
+#include <omp.h>
 
 using namespace std;
 
@@ -279,12 +280,14 @@ int main(int argc, char ** argv) {
 	float** adjacencyMatrixA = new float*[N];
 	for (int i = 0; i < N; ++i) { adjacencyMatrixA[i] = new float[N]; }
 
+    #pragma omp parallel for
 	for (int i = 0; i < N; ++i){
 		for (int j = 0; j < N; ++j){
 			adjacencyMatrixA[i][j]=0;
 		}
 	}
 
+    #pragma omp parallel for
 	for (int i = 0; i < N; ++i) {
 		for (int j = 0; j < K; ++j) {			
 			int point2=B_Index[i][j]; 
@@ -298,6 +301,7 @@ int main(int argc, char ** argv) {
 	float** adjacencyMatrixAT = new float*[N];
 	for (int i = 0; i < N; ++i) { adjacencyMatrixAT[i] = new float[N]; }
 
+    #pragma omp parallel for
 	for (int i = 0; i < N; ++i){			
 		for (int j = 0; j < N; ++j){
 			adjacencyMatrixAT[i][j]= adjacencyMatrixA[j][i];         
@@ -310,6 +314,7 @@ int main(int argc, char ** argv) {
 	float** graph = new float*[N];
 	for (int i = 0; i < N; ++i) { graph[i] = new float[N]; }	
 
+    #pragma omp parallel for
 	float MaxWeight=0;
 	for (int i = 0; i < N; ++i){			
 		for (int j = 0; j < N; ++j){
@@ -322,6 +327,7 @@ int main(int argc, char ** argv) {
 	/**
 	 * Removing the small weights in accordance to https://github.com/lmcinnes/umap/blob/master/umap/umap_.py#L1032
 	 */
+	#pragma omp parallel for
 	for (int i = 0; i < N; ++i){			
 		for (int j = 0; j < N; ++j){
 			if (graph[i][j] <  epsilon) continue; 

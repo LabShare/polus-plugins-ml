@@ -159,7 +159,6 @@ int main(int argc, char ** argv) {
 	logFile<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
 	logFile<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;	
 
-
 	cout<<"------------The following Input Arguments were read------------"<<endl;
 	cout<<"The full path to the input file: "<< filePath<<endl;
 	cout<<"The full path to the output file: "<< outputPath<<endl;
@@ -174,13 +173,6 @@ int main(int argc, char ** argv) {
 	cout<<"The optional variable 1 for the distance: "<< distanceV1 <<endl; 
 	cout<<"The optional variable 2 for the distance: "<< distanceV2 <<endl;
 	cout<<"The full path to optional array for the distance metric computation: "<< filePathOptionalArray <<endl;
-
-	if (K > N) {
-		logFile<<" The desired number of NN has exceeded the size of dataset "<<endl;
-		cout<<" The desired number of NN has exceeded the size of dataset "<<endl;   
-		return 1;
-	}
-
 	/**
 	 * Size of Dataset without the header (i.e.(#Rows in dataset)-1).
 	 */
@@ -197,6 +189,12 @@ int main(int argc, char ** argv) {
 	Dim = stoi(exec(cmd2.c_str())); 
 	logFile<<"The Dimension of Dataset Features(Number of Columns in inputfile): "<< Dim <<endl;
 	cout<<"The Dimension of Dataset Features(Number of Columns in inputfile): "<< Dim <<endl;
+
+	if (K > N) {
+		logFile<<" The desired number of NN has exceeded the size of dataset "<<endl;
+		cout<<" The desired number of NN has exceeded the size of dataset "<<endl;   
+		return 1;
+	}
 
 	logFile<<"------------END of INPUT READING------------"<< endl;	
 	cout<<"------------END of INPUT READING------------"<< endl;

@@ -314,8 +314,8 @@ int main(int argc, char ** argv) {
 	float** graph = new float*[N];
 	for (int i = 0; i < N; ++i) { graph[i] = new float[N]; }	
 
-    #pragma omp parallel for
 	float MaxWeight=0;
+    #pragma omp parallel for
 	for (int i = 0; i < N; ++i){			
 		for (int j = 0; j < N; ++j){
 			float tmp = adjacencyMatrixA[i][j]+adjacencyMatrixAT[i][j]-adjacencyMatrixA[i][j]*adjacencyMatrixAT[i][j];  

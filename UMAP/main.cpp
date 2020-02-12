@@ -435,7 +435,13 @@ int main(int argc, char ** argv) {
 	double dist_squared;
 	// The main training loop     
 	for (int n = 0; n < n_epochs; ++n) {
-		//Loop over all edges of the graph  	    	  
+	
+		//Loop over all edges of the graph 
+		if (n/10*10 == n){
+		logFile << "SGD iteration = "<<n<<" from "<< n_epochs <<endl;
+		cout << "SGD iteration = "<<n<<" from "<< n_epochs <<endl;
+		}
+				 	    	  
 		for (int i = 0; i < edgeCounts; ++i) {  	
 			if (epoch_of_next_sample[i] <= n){ 	
 
